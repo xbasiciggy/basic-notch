@@ -1,0 +1,11 @@
+// Default: anyone can build with ad-hoc signing ("Sign to Run Locally").
+CODE_SIGN_IDENTITY = -
+CODE_SIGN_STYLE = Automatic
+
+// Optional, untracked: Config/Local.xcconfig overrides the above with your own developer identity,
+// which keeps the app's signature stable between rebuilds so macOS stops re-asking for Keychain
+// and privacy permissions. Example contents:
+//   CODE_SIGN_IDENTITY = Apple Development
+//   CODE_SIGN_STYLE = Manual
+//   DEVELOPMENT_TEAM = ABCDE12345
+#include? "Local.xcconfig"
