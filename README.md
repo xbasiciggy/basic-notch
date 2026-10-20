@@ -4,19 +4,19 @@ Free native Mac notch companion. macOS 14 or later; universal Apple Silicon + In
 
 ## Download for Mac
 
-[Download the Mac installer (.dmg)](https://github.com/xbasiciggy/basic-notch/releases/download/v1.0.1-preview.1/BasicNotch-1.0.1.dmg) · [All preview downloads and release notes](https://github.com/xbasiciggy/basic-notch/releases/tag/v1.0.1-preview.1)
+[Download the Mac installer (.dmg)](https://github.com/xbasiciggy/basic-notch/releases/download/v1.1.0-preview.1/BasicNotch-1.1.0.dmg) · [All preview downloads and release notes](https://github.com/xbasiciggy/basic-notch/releases/tag/v1.1.0-preview.1)
 
 Open the DMG, drag BasicNotch into Applications, then launch it. This free preview supports macOS 14+ on Apple Silicon and Intel. It is locally signed and **not Apple notarized**, so macOS may show a security warning. Read the release notes and included installation notice before installing.
 
 ## Install
 
-Open `dist/preview/BasicNotch-1.0.1.dmg`, drag BasicNotch to Applications and launch it. Use the sparkle menu in the menu bar to access Settings, Getting Started, the full User Guide, or Quit. There is no Dock icon.
+Open `dist/preview/BasicNotch-1.1.0.dmg`, drag BasicNotch to Applications and launch it. Use the sparkle menu in the menu bar to access Settings, Getting Started, the full User Guide, or Quit. There is no Dock icon.
 
 The local package is ad-hoc signed, not notarized. A Developer ID signed and Apple-notarized build is needed for the usual warning-free internet download flow.
 
 ## Features
 
-Music/Spotify controls and lyrics, sports scores, optional PlayStation friends, crypto charts and alerts, weather and golden hour, file Shelf, in-memory clipboard history, local camera-card imports, optional Tumblr posts, focus timer, system stats, battery and AirPods status, calendar reminders, camera mirror, compatible download progress, best-effort recording timer, local Claude Code usage estimates, and Pokémon companions with catching, battles and Pokédex.
+Lightroom Classic export monitoring, simultaneous notches on multiple displays, Pokémon boundaries that protect activity text, Music/Spotify controls and lyrics, sports scores, optional PlayStation friends, crypto charts and alerts, weather and golden hour, file Shelf, in-memory clipboard history, local camera-card imports, optional Tumblr posts, focus timer, system stats, battery and AirPods status, calendar reminders, camera mirror, compatible download progress, best-effort recording timer, local Claude Code usage estimates, and Pokémon companions with catching, battles and Pokédex.
 
 Includes 18 Pokémon and 16 shiny variants from SpriteCollab, with unchanged PNG sheets, original credit logs, contributor names, license and a pinned source revision. Artwork terms are noncommercial and attribution is required; see [credits](Docs/SPRITE-CREDITS.md). No endorsement is implied.
 
@@ -41,6 +41,24 @@ SIGN_IDENTITY='Developer ID Application: Your Name (TEAMID)' NOTARY_PROFILE=Basi
 ```
 
 The script signs with hardened runtime and camera/Automation entitlements, submits to Apple, staples and validates tickets, and assesses the app. It does not publish, install into Applications or modify an existing app. Do not put signing secrets in the source tree.
+
+## Lightroom export monitor
+
+Install the companion `BasicNotchExport.lrplugin` from the DMG or separate plug-in ZIP. In Lightroom Classic, add it with File → Plug-in Manager, then insert its action under Export → Post-Process Actions. It reports rendering progress locally without changing export settings or image files. Only exports with this action are tracked; later publishing/upload steps are not tracked. See [setup guide](Docs/LIGHTROOM-SETUP.md).
+
+## Multiple displays
+
+Settings → General → Show notch on all connected displays enables simultaneous notches. Each display has independent hover, pin, tab and Pokémon state. Music, export progress and other app services are shared. Display removal closes that panel and stops its Pokémon timer.
+
+Version and build appear at the bottom of Settings → General.
+
+## Checks
+
+```sh
+tools/run-checks.sh
+```
+
+Set `LUA_BIN` to a Lua 5.1 executable to include the Lightroom action tests and Lua-to-Swift snapshot checks. Pure Swift checks cover display selection/fallback, sprite boundaries, malformed snapshots, stale heartbeats, concurrent jobs and completion notifications. Full Lightroom-host and physical multi-monitor testing remain preview checks.
 
 ## Artwork refresh
 

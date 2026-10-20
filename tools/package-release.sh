@@ -4,7 +4,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
-VERSION=1.0.1
+VERSION=1.1.0
 IDENTITY="${SIGN_IDENTITY:--}"
 if [[ "$IDENTITY" == '-' ]]; then OUT="$ROOT/dist/preview"; else OUT="$ROOT/dist/release"; fi
 if [[ "$IDENTITY" != '-' && -z "${NOTARY_PROFILE:-}" ]]; then
@@ -45,6 +45,10 @@ else
     echo 'DEVELOPER ID SIGNED — APPLE NOTARIZATION COMPLETED' > "$DMGROOT/READ ME FIRST.txt"
 fi
 cat Docs/USER-GUIDE.md >> "$DMGROOT/READ ME FIRST.txt"
+ditto "$ROOT/BasicNotch/Resources/Lightroom.bundle/BasicNotchExport.lrplugin" "$DMGROOT/BasicNotchExport.lrplugin"
+cp Docs/LIGHTROOM-SETUP.md "$DMGROOT/LIGHTROOM-SETUP.txt"
+ditto -c -k --keepParent "$DMGROOT/BasicNotchExport.lrplugin" "$OUT/BasicNotch-Lightroom-Plugin-$VERSION.zip"
+cp Docs/LIGHTROOM-SETUP.md "$OUT/LIGHTROOM-SETUP.md"
 hdiutil create -volname BasicNotch -srcfolder "$DMGROOT" -format UDZO -ov "$OUT/BasicNotch-$VERSION.dmg"
 if [[ "$IDENTITY" != '-' ]]; then
     codesign --sign "$IDENTITY" --timestamp "$OUT/BasicNotch-$VERSION.dmg"
@@ -56,5 +60,5 @@ fi
 ditto "$APP" "$OUT/BasicNotch.app"
 ditto -c -k --keepParent "$APP" "$OUT/BasicNotch-$VERSION.zip"
 cp Docs/USER-GUIDE.md "$OUT/USER-GUIDE.md"
-shasum -a 256 "$OUT/BasicNotch-$VERSION.dmg" "$OUT/BasicNotch-$VERSION.zip" > "$OUT/SHA256SUMS.txt"
+(cd "$OUT" && shasum -a 256 "BasicNotch-$VERSION.dmg" "BasicNotch-$VERSION.zip" "BasicNotch-Lightroom-Plugin-$VERSION.zip") > "$OUT/SHA256SUMS.txt"
 echo "Packaged in $OUT (signing identity: $IDENTITY)"

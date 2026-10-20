@@ -18,6 +18,9 @@ struct SettingsView: View {
     @AppStorage("cryptoCoins") private var coins = "bitcoin,ethereum,solana,dogecoin"
     @AppStorage("favoriteTeams") private var favoriteTeams = ""
     @AppStorage("claudeBlockLimit") private var claudeLimit = 0
+    @AppStorage("notchAllDisplays") private var allDisplays = false
+    @AppStorage("liveLightroomExports") private var liveLightroomExports = true
+    @AppStorage("alertLightroomExports") private var alertLightroomExports = true
     @AppStorage("notchDisplayID") private var displayID = 0
     @AppStorage("hiddenTabs") private var hiddenTabs = ""
     @AppStorage("notchTheme") private var theme: NotchTheme = .glass
@@ -92,6 +95,7 @@ struct SettingsView: View {
             }
 
             Section {
+                Toggle("Lightroom Classic export progress", isOn: $liveLightroomExports)
                 Toggle(isOn: $liveDownloads) { Label("Downloads and AirDrop progress", systemImage: "arrow.down.circle") }
                 Toggle(isOn: $liveCardIngest) { Label("Camera card import", systemImage: "sdcard") }
                 Toggle(isOn: $liveRecording) { Label("Screen recording timer", systemImage: "record.circle") }
@@ -103,12 +107,14 @@ struct SettingsView: View {
             }
 
             Section("Behavior") {
+                Toggle("Show notch on all connected displays", isOn: $allDisplays)
                 Picker("Screen", selection: $displayID) {
                     Text("Automatic (built-in display)").tag(0)
                     ForEach(NSScreen.screens, id: \.self) { screen in
                         Text(NotchScreen.name(of: screen)).tag(NotchScreen.id(of: screen))
                     }
                 }
+                .disabled(allDisplays)
                 Toggle("Show album art & visualizer when music plays", isOn: $musicLiveActivity)
                 Toggle("Haptic feedback when the notch opens", isOn: $haptics)
                 if let loginError { Text(loginError).font(.caption).foregroundStyle(.red) }
@@ -121,6 +127,16 @@ struct SettingsView: View {
                             launchAtLogin = SMAppService.mainApp.status == .enabled
                         }
                     }
+            }
+            Section {
+                HStack {
+                    Text("BasicNotch").fontWeight(.medium)
+                    Spacer()
+                    Text("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—") · Build \(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "—")")
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+                }
+                .font(.caption)
             }
         }
         .formStyle(.grouped)
@@ -276,6 +292,7 @@ struct SettingsView: View {
                         if alertSunset {
                             Toggle("Only when the color looks good (55+)", isOn: $alertSunsetGoodOnly)
                         }
+                        Toggle("Lightroom export finished or failed", isOn: $alertLightroomExports)
                         Toggle("Camera card inserted and imported", isOn: $alertCard)
                     }
                     DisclosureGroup("System") {

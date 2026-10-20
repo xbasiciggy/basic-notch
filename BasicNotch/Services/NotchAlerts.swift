@@ -74,6 +74,12 @@ extension NotchViewModel {
     }
 
     func startAlerts() {
+        exports.onFinish = { [weak self] job in
+            guard let self, self.alertOn("alertLightroomExports"), job.total > 0 else { return }
+            self.show(NotchBanner(icon: job.state == .completed ? "checkmark.circle.fill" : "exclamationmark.circle",
+                title: job.state == .completed ? "Lightroom rendered" : "Lightroom export stopped",
+                detail: "\(job.completed)/\(job.total) photos", tint: job.state == .completed ? .cyan : .orange))
+        }
         watchScores()
         watchFriends()
         watchCoins()

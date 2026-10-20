@@ -2,7 +2,7 @@ import SwiftUI
 import Combine
 
 enum NotchTab: String, CaseIterable, Identifiable {
-    case music, sports, gaming, crypto, weather, files, pokedex, focus, system
+    case music, sports, gaming, crypto, weather, files, exports, pokedex, focus, system
 
     var id: Self { self }
 
@@ -14,6 +14,7 @@ enum NotchTab: String, CaseIterable, Identifiable {
         case .crypto: "Crypto"
         case .weather: "Weather"
         case .files: "Shelf"
+        case .exports: "Lightroom"
         case .pokedex: "Pokédex"
         case .focus: "Focus"
         case .system: "System"
@@ -31,6 +32,7 @@ enum NotchTab: String, CaseIterable, Identifiable {
         case .focus: "timer"
         case .system: "cpu"
         case .files: "tray.full.fill"
+        case .exports: "camera.aperture"
         }
     }
 }
@@ -54,6 +56,9 @@ enum AppSettings {
         "wingWidth": 110.0,
         "hiddenTabs": "",
         "notchDisplayID": 0,
+        "notchAllDisplays": false,
+        "liveLightroomExports": true,
+        "alertLightroomExports": true,
         "showPokemon": true,
         "pokemonCount": 3,
         "shinyOdds": 64,
@@ -118,37 +123,63 @@ final class NotchViewModel: ObservableObject {
 
     let expandedSize = CGSize(width: 780, height: 290)
 
-    let music = NowPlayingService()
-    let sports = SportsService()
-    let psn = PSNService()
-    let crypto = CryptoService()
-    let weather = WeatherService()
-    let files = FileTrayService()
-    let calendar = CalendarService()
-    let battery = BatteryService()
+    let music: NowPlayingService
+    let sports: SportsService
+    let psn: PSNService
+    let crypto: CryptoService
+    let weather: WeatherService
+    let files: FileTrayService
+    let calendar: CalendarService
+    let battery: BatteryService
     let party = PokemonParty()
     let cursor = CursorTracker()
-    let clipboard = ClipboardService()
-    let tumblr = TumblrService()
-    let volume = SystemVolume()
-    let focus = FocusTimer()
-    let system = SystemStatsService()
-    let airpods = AirPodsService()
-    let claude = ClaudeUsageService()
-    let lyrics = LyricsService()
-    let cards = CardIngestService()
-    let downloads = DownloadMonitor()
-    let recording = ScreenRecordingMonitor()
-    let goldenHour = GoldenHourClock()
+    let clipboard: ClipboardService
+    let tumblr: TumblrService
+    let volume: SystemVolume
+    let focus: FocusTimer
+    let system: SystemStatsService
+    let airpods: AirPodsService
+    let claude: ClaudeUsageService
+    let lyrics: LyricsService
+    let cards: CardIngestService
+    let downloads: DownloadMonitor
+    let recording: ScreenRecordingMonitor
+    let goldenHour: GoldenHourClock
 
+    let exports: LightroomExportService
+    var openGuide: () -> Void = {}
     var openSettings: () -> Void = {}
     var bag = Set<AnyCancellable>()
 
-    init() {
+    init(shared: NotchViewModel? = nil) {
         AppSettings.register()
+        self.music = shared?.music ?? NowPlayingService()
+        self.sports = shared?.sports ?? SportsService()
+        self.psn = shared?.psn ?? PSNService()
+        self.crypto = shared?.crypto ?? CryptoService()
+        self.weather = shared?.weather ?? WeatherService()
+        self.files = shared?.files ?? FileTrayService()
+        self.calendar = shared?.calendar ?? CalendarService()
+        self.battery = shared?.battery ?? BatteryService()
+        self.clipboard = shared?.clipboard ?? ClipboardService()
+        self.tumblr = shared?.tumblr ?? TumblrService()
+        self.volume = shared?.volume ?? SystemVolume()
+        self.focus = shared?.focus ?? FocusTimer()
+        self.system = shared?.system ?? SystemStatsService()
+        self.airpods = shared?.airpods ?? AirPodsService()
+        self.claude = shared?.claude ?? ClaudeUsageService()
+        self.lyrics = shared?.lyrics ?? LyricsService()
+        self.cards = shared?.cards ?? CardIngestService()
+        self.downloads = shared?.downloads ?? DownloadMonitor()
+        self.recording = shared?.recording ?? ScreenRecordingMonitor()
+        self.goldenHour = shared?.goldenHour ?? GoldenHourClock()
+        exports = shared?.exports ?? LightroomExportService()
+        if let shared {
+            shared.$banner.sink { [weak self] in self?.banner = $0 }.store(in: &bag)
+        }
     }
 
-    func start() {
+    func start(startServices: Bool = true, startParty: Bool = true) {
         music.$isPlaying.sink { [weak self] in self?.party.musicPlaying = $0 }.store(in: &bag)
         $isOpen.sink { [weak self] in self?.party.isOpen = $0 }.store(in: &bag)
         $notchSize.sink { [weak self] in self?.party.notchHalfWidth = $0.width / 2 }.store(in: &bag)
@@ -160,6 +191,12 @@ final class NotchViewModel: ObservableObject {
         downloads.objectWillChange.sink { [weak self] in self?.objectWillChange.send() }.store(in: &bag)
         recording.objectWillChange.sink { [weak self] in self?.objectWillChange.send() }.store(in: &bag)
         goldenHour.objectWillChange.sink { [weak self] in self?.objectWillChange.send() }.store(in: &bag)
+
+        exports.objectWillChange.sink { [weak self] in self?.objectWillChange.send() }.store(in: &bag)
+        focus.$isRunning.sink { [weak self] in self?.party.focusMode = $0 }.store(in: &bag)
+        weather.$now.sink { [weak self] in self?.party.weather = $0.map { ($0.code, $0.isDay) } }.store(in: &bag)
+        if startParty { party.start() }
+        guard startServices else { return }
 
         // Look up lyrics whenever the song changes — once its own length is known, so LRCLIB returns
         // the version that matches (remasters and edits have different timings).
@@ -182,7 +219,7 @@ final class NotchViewModel: ObservableObject {
             if title.isEmpty { self?.lyrics.load(title: "", artist: "", album: "", duration: 0) }
         }.store(in: &bag)
 
-        party.start()
+        exports.start()
         sports.start()
         psn.start()
         crypto.start()
@@ -208,11 +245,12 @@ final class NotchViewModel: ObservableObject {
 
     /// Live activities beyond music, in priority order: the first one active shows in the closed notch.
     enum LiveActivity: Equatable {
-        case cardImport, download, recording, card, goldenHour
+        case lightroomExport, cardImport, download, recording, card, goldenHour
     }
 
     var liveActivity: LiveActivity? {
         let on = { (key: String) in UserDefaults.standard.bool(forKey: key) }
+        if !exports.active.isEmpty && on("liveLightroomExports") { return .lightroomExport }
         if cards.progress != nil && on("liveCardIngest") { return .cardImport }
         if !downloads.items.isEmpty && on("liveDownloads") { return .download }
         if recording.isRecording && on("liveRecording") { return .recording }

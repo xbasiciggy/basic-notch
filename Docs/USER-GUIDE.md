@@ -1,10 +1,10 @@
-# BasicNotch 1.0.1 — User Guide & Features
+# BasicNotch 1.1.0 — User Guide & Features
 
 A free notch companion for macOS 14 Sonoma or later. This universal app contains both Apple Silicon and Intel executables. It works on a MacBook with a notch, on a Mac without a notch, and on an external display.
 
 ## Install and start
 
-1. Open BasicNotch-1.0.1.dmg.
+1. Open BasicNotch-1.1.0.dmg.
 2. Drag BasicNotch into Applications. Eject the disk image.
 3. Open BasicNotch from Applications. Look for the sparkle icon in the menu bar; this utility does not show a Dock icon.
 4. Read the welcome window and choose Open My Notch. Hover at the top center of your selected display to open it again.
@@ -20,11 +20,12 @@ This supplied build is locally signed, not Apple notarized. macOS may block an a
 
 - Hover to expand; pin to keep open; drag a file onto the notch to open the Shelf.
 - Floating panel across Spaces, with support for fullscreen apps where macOS permits.
-- Automatic built-in display selection, a specific display setting, and Move to Next Screen.
+- Automatic built-in display selection, a specific display setting, Move to Next Screen, or simultaneous notches on all connected displays. Each has independent hover/tab/pin state and Pokémon; background services are shared.
 - Configurable tab visibility and side-wing width.
 - Glass, black and other available theme choices, album-color glow, adjustable neon color and intensity.
 - Optional opening haptics on supported hardware.
 - Optional Launch at login in Settings; errors are shown if macOS rejects registration.
+- Version and build number at the bottom of Settings → General, read from the installed app metadata.
 - Menu-bar access to Settings, Getting Started, the User Guide, About, Pokémon respawn and Quit.
 
 ### Now Playing
@@ -103,11 +104,51 @@ This supplied build is locally signed, not Apple notarized. macOS may block an a
 
 - 18 bundled species: Bulbasaur, Charmander, Squirtle, Pikachu, Jigglypuff, Gengar, Eevee, Dratini, Cyndaquil, Mudkip, Turtwig, Lucario, Glaceon, Zorua, Sylveon, Rowlet, Mimikyu and Snom.
 - 16 shiny variants, walking/idle animations and supported battle/hurt/faint animations.
-- Configurable party size (1–6), random party rotation and respawn.
+- Configurable party size (1–6 per display), random party rotation and respawn.
+- Whole-sprite movement boundaries plus clipping keep Pokémon, bubbles and battle/catching effects away from closed-notch activity icons and text. Reserved space follows the activity label width.
 - Occasional battles, music reactions, speech bubbles and click-to-throw catching behavior.
 - Catch history/Pokédex, reset, shiny odds, weather-influenced types and generation filters. Filters apply to the included roster; this is not a complete national Pokédex sprite pack.
 - SpriteCollab source revision and individual original contributor logs are bundled under Mons.bundle/CREDITS.md, with the name directory and license. An accessible Credits link is included in the HTML guide.
 - The source repository lists CC BY-NC 4.0 terms. This package is prepared for free, noncommercial use with attribution; no endorsement by Nintendo, Game Freak, The Pokémon Company, Chunsoft or contributors is implied. Underlying character/game rights remain with their owners.
+
+## Lightroom Classic export monitor
+
+
+
+Requires Lightroom **Classic** on Mac and BasicNotch 1.1.0 or later. This companion is an export post-process action, not a cloud Lightroom plug-in.
+
+### Install once
+
+1. Install and open BasicNotch.
+2. Get `BasicNotchExport.lrplugin` from the disk image, extract the separate Lightroom plug-in ZIP, or open the notch → Lightroom → Save Plug-in. Put the entire `.lrplugin` folder somewhere permanent, such as Documents/Lightroom Plug-ins. Keep the Lua files inside it together.
+3. In Lightroom Classic choose **File → Plug-in Manager → Add**, select `BasicNotchExport.lrplugin`, and enable it. Some Lightroom versions may show a third-party plug-in notice.
+4. Select photos and open Lightroom’s **Export** dialog. Keep your usual **Export To** destination and all image/file settings.
+5. Under **Post-Process Actions**, select **BasicNotch Export Monitor** and click **Insert**. Put this action last in the list. Save an export preset with this action included if you want it on future exports.
+6. Click **Export**. The closed notch shows a progress ring and processed/total count. Open the notch’s **Lightroom** tab to inspect active/recent jobs or choose **Show Folder**.
+
+### What is monitored
+
+Only exports with this action inserted are monitored. The action reports photos reaching it in Lightroom’s render/post-processing pipeline. It does not rewrite photos or alter export settings. It does not observe every Lightroom task, and cannot prove completion of later cloud uploads/publishing steps or filters placed after it. Its completion means the monitored rendering stage ended.
+
+Multiple jobs can run at once; the compact indicator combines their processed/total counts. The Lightroom tab lists individual jobs with rendered counts, failures and status. Failed renditions continue to report their failure to Lightroom. Cancelled/incomplete jobs are shown as stopped. If updates cease for 45 seconds, BasicNotch shows connection lost instead of reporting success. A new heartbeat can resume the job.
+
+Export completion/failure banners and compact progress can be switched off in BasicNotch Settings. Clear Finished hides completed/stopped history for the current app session; it does not delete photos or the Lightroom records.
+
+### Privacy and troubleshooting
+
+Status snapshots stay on your Mac in `~/Library/Application Support/BasicNotch/LightroomExports/`. They contain a job ID, timestamps, counts, last rendered filename, output folder and an error/status message. They contain no image pixels and the monitor uploads nothing. Other BasicNotch widgets have their own documented providers.
+
+If progress does not appear, check that BasicNotch is running, the plug-in is enabled, and the action was inserted into this export (not just installed in Plug-in Manager). Try a new export after installation. If the status directory cannot be written, the monitor silently stops reporting so it does not break your export. Check Lightroom’s own export results and file access permissions.
+
+Show Folder uses the most recently reported destination folder; a job can export to several folders. Progress counts rendered photos, not bytes or estimated remaining time. Old status files are ignored after seven days; they may be manually deleted after exports finish. The app reads at most the latest 128 snapshots and displays up to 24 jobs.
+
+The plug-in uses Adobe’s documented export filter interface: https://developer.adobe.com/lightroom-classic . SDK behavior was exercised with Lua test doubles and real snapshot parsing. Full Lightroom-host testing on your installed Classic version remains part of preview testing.
+
+### Multiple screens
+
+In BasicNotch Settings → General turn on **Show notch on all connected displays**, or choose **Show on Screen → All Connected Displays** from its sparkle menu. Each screen has independent hovering, tabs, pinning and Pokémon. Export progress, music, files and settings are shared, with one set of background services.
+
+When a display disconnects, its panel and Pokémon timer are removed. In single-screen mode an unavailable selected screen falls back to the automatic display; reconnecting restores that saved choice. Switching to a particular screen turns all-displays mode off.
 
 ## Permissions, accounts and privacy
 

@@ -4,7 +4,9 @@ struct PokemonStage: View {
     @ObservedObject var party: PokemonParty
     let width: CGFloat
     let height: CGFloat
-    let edgeInset: CGFloat
+    let leadingInset: CGFloat
+    let trailingInset: CGFloat
+    let closed: Bool
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -37,14 +39,26 @@ struct PokemonStage: View {
         }
         .animation(.easeOut(duration: 0.25), value: party.battle?.phase == .approach)
         .frame(width: max(width, 0), height: height)
+        // A hard horizontal mask also contains speech bubbles, battle effects and catch animations.
+        .mask {
+            Rectangle().frame(width: max(0, width - leadingInset - trailingInset), height: height + 120)
+                .offset(x: (leadingInset - trailingInset) / 2)
+        }
         .onAppear { sync() }
         .onChange(of: width) { _, _ in sync() }
-        .onChange(of: edgeInset) { _, _ in sync() }
+        .onChange(of: leadingInset) { _, _ in sync() }
+        .onChange(of: trailingInset) { _, _ in sync() }
+        .onChange(of: height) { _, _ in sync() }
+        .onChange(of: closed) { _, _ in sync() }
     }
 
     private func sync() {
         party.halfWidth = width / 2
-        party.edgeInset = edgeInset
+        party.leadingInset = leadingInset
+        party.trailingInset = trailingInset
+        party.edgeInset = max(leadingInset, trailingInset)
+        party.spriteMaxHeight = max(1, height - 3)
+        party.constrainMembers()
     }
 }
 

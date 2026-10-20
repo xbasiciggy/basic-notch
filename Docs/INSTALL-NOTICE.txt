@@ -1,4 +1,4 @@
-BASICNOTCH 1.0.1 — LOCAL PREVIEW
+BASICNOTCH 1.1.0 — LOCAL PREVIEW
 
 This preview build has not been notarized by Apple. macOS may show a security warning when it is downloaded from the internet. Only install a copy from a source you trust. This notice is not a replacement for Developer ID signing and Apple notarization.
 

@@ -46,6 +46,9 @@ final class PokemonParty: ObservableObject {
     var isOpen = false
     var halfWidth: CGFloat = 200
     var edgeInset: CGFloat = 12
+    var leadingInset: CGFloat = 12
+    var trailingInset: CGFloat = 12
+    var spriteMaxHeight: CGFloat = 25
     var notchHalfWidth: CGFloat = 95
     /// Current weather (Open-Meteo code + day/night) so the right types show up.
     var weather: (code: Int, isDay: Bool)?
@@ -72,6 +75,25 @@ final class PokemonParty: ObservableObject {
         }
         RunLoop.main.add(timer, forMode: .common)
         self.timer = timer
+    }
+
+    func stop() { timer?.invalidate(); timer = nil }
+
+    func bounds(for p: Pokemon) -> ClosedRange<CGFloat> {
+        let sprites = p.sprites
+        let scale = sprites.displayScale(maxHeight: spriteMaxHeight)
+        let animations: [SpriteAnim?] = [sprites.walk, sprites.idle, sprites.attack, sprites.hurt, sprites.faint]
+        var radius: CGFloat = 0
+        for animation in animations {
+            if let animation {
+                radius = max(radius, (animation.size.width / 2 + abs(animation.centerOffset)) * scale + 4)
+            }
+        }
+        return PokemonBounds.range(halfWidth: halfWidth, leading: leadingInset, trailing: trailingInset, radius: radius)
+    }
+
+    func constrainMembers() {
+        for i in members.indices { members[i].x = PokemonBounds.clamp(members[i].x, to: bounds(for: members[i])) }
     }
 
     func respawnAll() {
@@ -154,10 +176,10 @@ final class PokemonParty: ObservableObject {
         updateBattle(dt)
 
         guard !members.isEmpty else { return }
-        let edge = max(halfWidth - edgeInset, 20)
-
         for i in members.indices {
             var p = members[i]
+            let allowed = bounds(for: p)
+            p.x = PokemonBounds.clamp(p.x, to: allowed)
             p.animTime += dt
             p.actionTime += dt
             if p.catchPhase != nil {
@@ -202,15 +224,16 @@ final class PokemonParty: ObservableObject {
                 p.x += p.direction * p.speed * dt
             }
 
-            if abs(p.x) >= edge {
-                p.x = edge * (p.x > 0 ? 1 : -1)
-                if !p.leaving { p.direction = p.x > 0 ? -1 : 1 }
+            let reachedEdge = p.x <= allowed.lowerBound || p.x >= allowed.upperBound
+            if reachedEdge {
+                p.x = PokemonBounds.clamp(p.x, to: allowed)
+                if !p.leaving { p.direction = p.x >= allowed.upperBound ? -1 : 1 }
             }
 
             // Grow in on spawn; shrink away at the edge when leaving.
             if p.fainted {
                 p.scale -= dt * 1.5  // back into its Poké Ball
-            } else if p.leaving && abs(p.x) >= edge {
+            } else if p.leaving && reachedEdge {
                 p.scale -= dt * 4
             } else {
                 p.scale = min(1, p.scale + dt * 2.5)
@@ -263,6 +286,7 @@ final class PokemonParty: ObservableObject {
                         direction: Bool.random() ? 1 : -1,
                         speed: .random(in: 14...28),
                         moodTimer: .random(in: 1...3))
+        p.x = PokemonBounds.clamp(p.x, to: bounds(for: p))
         say(&p, shiny ? "✨" : "\(entry.name)!")
         members.append(p)
     }

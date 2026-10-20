@@ -1,7 +1,15 @@
 import SwiftUI
 
+private struct ActivityWidthKey: PreferenceKey {
+    static let defaultValue: [String: CGFloat] = [:]
+    static func reduce(value: inout [String: CGFloat], nextValue: () -> [String: CGFloat]) {
+        value.merge(nextValue(), uniquingKeysWith: max)
+    }
+}
+
 struct NotchRootView: View {
     @ObservedObject var vm: NotchViewModel
+    @State private var activityWidths: [String: CGFloat] = [:]
     @AppStorage("wingWidth") private var wingWidth = 110.0
     @AppStorage("showPokemon") private var showPokemon = true
     @AppStorage("musicLiveActivity") private var musicLiveActivity = true
@@ -58,7 +66,9 @@ struct NotchRootView: View {
                 PokemonStage(party: vm.party,
                              width: size.width - topRadius * 2,
                              height: vm.notchSize.height,
-                             edgeInset: (!vm.isOpen && liveActivity) ? 34 : 12)
+                             leadingInset: vm.isOpen ? 12 : max(liveActivity ? 34 : 12, (activityWidths["left"] ?? 0) + 20),
+                             trailingInset: vm.isOpen ? 12 : max(liveActivity ? 84 : 12, (activityWidths["right"] ?? 0) + 20),
+                             closed: !vm.isOpen)
                     .opacity(!vm.isOpen && vm.banner != nil ? 0 : 1)
             }
             if !vm.isOpen {
@@ -68,13 +78,16 @@ struct NotchRootView: View {
                 } else {
                     HStack(spacing: 0) {
                         leftActivity
+                            .background(GeometryReader { geo in Color.clear.preference(key: ActivityWidthKey.self, value: ["left": geo.size.width]) })
                         Spacer(minLength: 0)
                         rightActivity
+                            .background(GeometryReader { geo in Color.clear.preference(key: ActivityWidthKey.self, value: ["right": geo.size.width]) })
                     }
                     .padding(.horizontal, 8)
                 }
             }
         }
+        .onPreferenceChange(ActivityWidthKey.self) { activityWidths = $0 }
     }
 
     @ViewBuilder
@@ -126,6 +139,8 @@ struct LiveActivityIcon: View {
 
     var body: some View {
         switch activity {
+        case .lightroomExport:
+            ProgressRing(fraction: vm.exports.progress, color: .cyan, symbol: "camera.aperture")
         case .cardImport:
             ProgressRing(fraction: vm.cards.progress ?? 0, color: .orange, symbol: "sdcard.fill")
         case .download:
@@ -156,6 +171,8 @@ struct LiveActivityDetail: View {
     var body: some View {
         Group {
             switch activity {
+            case .lightroomExport:
+                Text(vm.exports.countLabel).foregroundStyle(.cyan)
             case .cardImport:
                 Text("\(vm.cards.copiedCount)/\(vm.cards.card?.newFiles.count ?? 0)").foregroundStyle(.orange)
             case .download:
@@ -366,6 +383,7 @@ struct ExpandedContent: View {
         case .weather: WeatherTab(weather: vm.weather)
         case .files: ShelfTab(tray: vm.files, clipboard: vm.clipboard, tumblr: vm.tumblr,
                                        cards: vm.cards, openSettings: vm.openSettings)
+        case .exports: LightroomExportsTab(exports: vm.exports, openGuide: vm.openGuide)
         case .pokedex: PokedexTab()
         case .focus: FocusTab(focus: vm.focus)
         case .system: SystemTab(stats: vm.system, battery: vm.battery, airpods: vm.airpods)
