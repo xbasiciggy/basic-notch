@@ -2,6 +2,12 @@
 
 Free native Mac notch companion. macOS 14 or later; universal Apple Silicon + Intel build.
 
+## Download for Mac
+
+[Download the Mac installer (.dmg)](https://github.com/xbasiciggy/basic-notch/releases/download/v1.0.1-preview.1/BasicNotch-1.0.1.dmg) · [All preview downloads and release notes](https://github.com/xbasiciggy/basic-notch/releases/tag/v1.0.1-preview.1)
+
+Open the DMG, drag BasicNotch into Applications, then launch it. This free preview supports macOS 14+ on Apple Silicon and Intel. It is locally signed and **not Apple notarized**, so macOS may show a security warning. Read the release notes and included installation notice before installing.
+
 ## Install
 
 Open `dist/preview/BasicNotch-1.0.1.dmg`, drag BasicNotch to Applications and launch it. Use the sparkle menu in the menu bar to access Settings, Getting Started, the full User Guide, or Quit. There is no Dock icon.
