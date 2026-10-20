@@ -27,8 +27,9 @@ local function writeSnapshot(folder, job)
     local ok, writeError = handle:write(table.concat(entries, '\n'))
     handle:close()
     if not ok then error(writeError or 'Cannot write monitor snapshot') end
-    -- macOS atomically replaces the previous snapshot, so the app never reads half a file.
-    local moved, moveError = os.rename(temp, target)
+    -- Lightroom omits os.rename. Publish only fully written files through its SDK.
+    if LrFileUtils.exists(target) then LrFileUtils.delete(target) end
+    local moved, moveError = LrFileUtils.move(temp, target)
     if not moved then error(moveError or 'Cannot replace monitor snapshot') end
 end
 
@@ -41,7 +42,7 @@ function Monitor.sectionForFilterInDialog(f, propertyTable)
 end
 
 function Monitor.postProcessRenderedPhotos(context, filterContext)
-    local folder = LrPathUtils.child(LrPathUtils.getStandardFilePath('appData'), 'BasicNotch/LightroomExports')
+    local folder = LrPathUtils.child(LrPathUtils.getStandardFilePath('home'), 'Library/Application Support/BasicNotch/LightroomExports')
     local now = os.time()
     local job = {
         version = 1, id = LrUUID.generateUUID(), state = 'running',

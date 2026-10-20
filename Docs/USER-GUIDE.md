@@ -142,7 +142,7 @@ If progress does not appear, check that BasicNotch is running, the plug-in is en
 
 Show Folder uses the most recently reported destination folder; a job can export to several folders. Progress counts rendered photos, not bytes or estimated remaining time. Old status files are ignored after seven days; they may be manually deleted after exports finish. The app reads at most the latest 128 snapshots and displays up to 24 jobs.
 
-The plug-in uses Adobe’s documented export filter interface: https://developer.adobe.com/lightroom-classic . SDK behavior was exercised with Lua test doubles and real snapshot parsing. Full Lightroom-host testing on your installed Classic version remains part of preview testing.
+The plug-in uses Adobe’s documented export filter interface: https://developer.adobe.com/lightroom-classic . Verified on one Mac in Lightroom Classic with a real 63-photo JPEG export, advancing closed-notch Live Activity progress and a completed 63/63 status using the same monitor code in Basic Notch Dev. Other versions and configurations remain preview testing.
 
 ### Multiple screens
 

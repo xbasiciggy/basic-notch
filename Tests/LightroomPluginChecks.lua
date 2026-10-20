@@ -2,11 +2,24 @@
 local plugin, base = arg[1], arg[2]
 local sequence, checks, failedDestinations = 0, 0, 0
 local function check(value, message) assert(value, message); checks = checks + 1 end
+local rename, remove = os.rename, os.remove
+-- Match Lightroom’s restricted Lua os namespace.
+os.rename = nil
+os.remove = nil
 local modules = {
-    LrFileUtils = { createAllDirectories = function() end },
+    LrFileUtils = {
+        createAllDirectories = function() end,
+        exists = function(path) local f = io.open(path, 'rb'); if f then f:close(); return 'file' end end,
+        delete = remove,
+        move = function(src, dst)
+            local f = io.open(dst, 'rb')
+            if f then f:close(); return false, 'destination exists' end
+            return rename(src, dst)
+        end,
+    },
     LrPathUtils = {
         child = function(a, b) return a .. '/' .. b end,
-        getStandardFilePath = function() return base end,
+        getStandardFilePath = function(which) assert(which == 'home', 'use shared macOS home, not Lightroom appData'); return base end,
         leafName = function(path) return path:match('([^/]+)$') end,
         parent = function(path) return path:match('^(.*)/[^/]+$') end,
     },
@@ -46,7 +59,7 @@ local function run(total, outcomes, raiseError)
     end
     local ok = pcall(monitor.postProcessRenderedPhotos, context, filter)
     if cleanup then cleanup() end
-    local file = assert(io.open(base .. '/BasicNotch/LightroomExports/lua-test-' .. sequence .. '.plist', 'rb'))
+    local file = assert(io.open(base .. '/Library/Application Support/BasicNotch/LightroomExports/lua-test-' .. sequence .. '.plist', 'rb'))
     local text = file:read('*a'); file:close()
     return text, ok
 end

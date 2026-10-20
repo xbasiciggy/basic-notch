@@ -9,5 +9,5 @@ return {
         id = 'monitor',
         supportsVideo = false,
     },
-    VERSION = { major = 1, minor = 1, revision = 0, build = 3 },
+    VERSION = { major = 1, minor = 1, revision = 1, build = 4 },
 }

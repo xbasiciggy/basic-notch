@@ -172,7 +172,8 @@ struct LiveActivityDetail: View {
         Group {
             switch activity {
             case .lightroomExport:
-                Text(vm.exports.countLabel).foregroundStyle(.cyan)
+                Text("Lr \(vm.exports.countLabel)").foregroundStyle(.cyan)
+                    .accessibilityLabel("Lightroom export: \(vm.exports.countLabel) photos")
             case .cardImport:
                 Text("\(vm.cards.copiedCount)/\(vm.cards.card?.newFiles.count ?? 0)").foregroundStyle(.orange)
             case .download:

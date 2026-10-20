@@ -11,6 +11,10 @@ Requires Lightroom **Classic** on Mac and BasicNotch 1.1.0 or later. This compan
 5. Under **Post-Process Actions**, select **BasicNotch Export Monitor** and click **Insert**. Put this action last in the list. Save an export preset with this action included if you want it on future exports.
 6. Click **Export**. The closed notch shows a progress ring and processed/total count. Open the notch’s **Lightroom** tab to inspect active/recent jobs or choose **Show Folder**.
 
+## Updating from 1.1.0
+
+Replace both the app and companion plug-in with 1.1.1. In Lightroom Plug-in Manager, expand Plug-in Author Tools and click Reload Plug-in, then run a new export. This fixes the shared status folder and a file operation unavailable inside Lightroom. In BasicNotch Settings → General → Live activities, enable **Lightroom Classic export progress** to see the cyan progress ring and `Lr processed/total` count.
+
 ## What is monitored
 
 Only exports with this action inserted are monitored. The action reports photos reaching it in Lightroom’s render/post-processing pipeline. It does not rewrite photos or alter export settings. It does not observe every Lightroom task, and cannot prove completion of later cloud uploads/publishing steps or filters placed after it. Its completion means the monitored rendering stage ended.
@@ -27,7 +31,7 @@ If progress does not appear, check that BasicNotch is running, the plug-in is en
 
 Show Folder uses the most recently reported destination folder; a job can export to several folders. Progress counts rendered photos, not bytes or estimated remaining time. Old status files are ignored after seven days; they may be manually deleted after exports finish. The app reads at most the latest 128 snapshots and displays up to 24 jobs.
 
-The plug-in uses Adobe’s documented export filter interface: https://developer.adobe.com/lightroom-classic . SDK behavior was exercised with Lua test doubles and real snapshot parsing. Full Lightroom-host testing on your installed Classic version remains part of preview testing.
+The plug-in uses Adobe’s documented export filter interface: https://developer.adobe.com/lightroom-classic . Verified on a Mac in Lightroom Classic with a 63-photo JPEG export, advancing closed-notch Live Activity progress and a completed 63/63 status. Other Lightroom versions and configurations remain preview testing.
 
 ## Multiple screens
 

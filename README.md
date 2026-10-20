@@ -4,13 +4,13 @@ Free native Mac notch companion. macOS 14 or later; universal Apple Silicon + In
 
 ## Download for Mac
 
-[Download the Mac installer (.dmg)](https://github.com/xbasiciggy/basic-notch/releases/download/v1.1.0-preview.1/BasicNotch-1.1.0.dmg) · [All preview downloads and release notes](https://github.com/xbasiciggy/basic-notch/releases/tag/v1.1.0-preview.1)
+[Download the Mac installer (.dmg)](https://github.com/xbasiciggy/basic-notch/releases/download/v1.1.1-preview.1/BasicNotch-1.1.1.dmg) · [All preview downloads and release notes](https://github.com/xbasiciggy/basic-notch/releases/tag/v1.1.1-preview.1)
 
 Open the DMG, drag BasicNotch into Applications, then launch it. This free preview supports macOS 14+ on Apple Silicon and Intel. It is locally signed and **not Apple notarized**, so macOS may show a security warning. Read the release notes and included installation notice before installing.
 
 ## Install
 
-Open `dist/preview/BasicNotch-1.1.0.dmg`, drag BasicNotch to Applications and launch it. Use the sparkle menu in the menu bar to access Settings, Getting Started, the full User Guide, or Quit. There is no Dock icon.
+Open `dist/preview/BasicNotch-1.1.1.dmg`, drag BasicNotch to Applications and launch it. Use the sparkle menu in the menu bar to access Settings, Getting Started, the full User Guide, or Quit. There is no Dock icon.
 
 The local package is ad-hoc signed, not notarized. A Developer ID signed and Apple-notarized build is needed for the usual warning-free internet download flow.
 
@@ -58,7 +58,7 @@ Version and build appear at the bottom of Settings → General.
 tools/run-checks.sh
 ```
 
-Set `LUA_BIN` to a Lua 5.1 executable to include the Lightroom action tests and Lua-to-Swift snapshot checks. Pure Swift checks cover display selection/fallback, sprite boundaries, malformed snapshots, stale heartbeats, concurrent jobs and completion notifications. Full Lightroom-host and physical multi-monitor testing remain preview checks.
+Set `LUA_BIN` to a Lua 5.1 executable to include the Lightroom action tests and Lua-to-Swift snapshot checks. Pure Swift checks cover display selection/fallback, sprite boundaries, malformed snapshots, stale heartbeats, concurrent jobs and completion notifications. A real 63-photo Lightroom Classic export verified Live Activity progress and completion on one Mac. Other Lightroom versions and physical multi-monitor testing remain preview checks.
 
 ## Artwork refresh
 
