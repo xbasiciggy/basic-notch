@@ -50,6 +50,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var screen: NSScreen?
     private var statusItem: NSStatusItem?
     private var settingsWindow: NSWindow?
+    private var welcomeWindow: NSWindow?
     private var monitors: [Any] = []
     private var closeTask: Task<Void, Never>?
     private var dragChangeCount = NSPasteboard(name: .drag).changeCount
@@ -63,6 +64,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         buildStatusItem()
         startMouseTracking()
         vm.start()
+        if !UserDefaults.standard.bool(forKey: "hasSeenWelcome") { showWelcome() }
 
         NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main
@@ -215,7 +217,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         item.button?.image = NSImage(systemSymbolName: "sparkles", accessibilityDescription: "BasicNotch")
         let menu = NSMenu()
         menu.addItem(withTitle: "Open Notch", action: #selector(openNotch), keyEquivalent: "").target = self
-        menu.addItem(withTitle: "Respawn Pokémon", action: #selector(respawn), keyEquivalent: "r").target = self
+        if !PokeBrawlSprites.roster.isEmpty {
+            menu.addItem(withTitle: "Respawn Pokémon", action: #selector(respawn), keyEquivalent: "r").target = self
+        }
         let screens = NSMenuItem(title: "Show on Screen", action: nil, keyEquivalent: "")
         screens.submenu = NSMenu(title: "Show on Screen")
         screens.submenu?.delegate = self
@@ -224,9 +228,39 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(.separator())
         menu.addItem(withTitle: "Settings…", action: #selector(openSettingsAction), keyEquivalent: ",").target = self
         menu.addItem(.separator())
+        menu.addItem(withTitle: "Getting Started…", action: #selector(showWelcome), keyEquivalent: "").target = self
+        menu.addItem(withTitle: "User Guide & Features…", action: #selector(openGuide), keyEquivalent: "?").target = self
+        menu.addItem(withTitle: "About BasicNotch", action: #selector(showAbout), keyEquivalent: "").target = self
+        menu.addItem(.separator())
         menu.addItem(withTitle: "Quit BasicNotch", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         item.menu = menu
         statusItem = item
+    }
+
+    @objc private func openGuide() {
+        if let url = Bundle.main.url(forResource: "UserGuide", withExtension: "html") {
+            NSWorkspace.shared.open(url)
+        }
+    }
+
+    @objc private func showAbout() { NSApp.orderFrontStandardAboutPanel(nil); NSApp.activate(ignoringOtherApps: true) }
+
+    @objc private func showWelcome() {
+        if welcomeWindow == nil {
+            let root = WelcomeView(onGuide: { [weak self] in self?.openGuide() }, onStart: { [weak self] in
+                UserDefaults.standard.set(true, forKey: "hasSeenWelcome")
+                self?.welcomeWindow?.close()
+                self?.openNotch()
+            })
+            let window = NSWindow(contentViewController: NSHostingController(rootView: root))
+            window.title = "Welcome to BasicNotch"
+            window.styleMask = [.titled, .closable]
+            window.isReleasedWhenClosed = false
+            window.center()
+            welcomeWindow = window
+        }
+        NSApp.activate(ignoringOtherApps: true)
+        welcomeWindow?.makeKeyAndOrderFront(nil)
     }
 
     @objc private func openNotch() {

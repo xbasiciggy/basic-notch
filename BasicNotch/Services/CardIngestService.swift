@@ -16,7 +16,7 @@ final class CardIngestService: ObservableObject {
     struct Import: Equatable {
         let folder: URL
         let count: Int
-        /// The JPEG/HEIC/PNG files, for sending on to Gallery Manager or Tumblr.
+        /// The JPEG/HEIC/PNG files, available for the Shelf and Tumblr.
         let images: [URL]
     }
 

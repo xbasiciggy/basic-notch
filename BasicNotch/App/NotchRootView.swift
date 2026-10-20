@@ -364,7 +364,7 @@ struct ExpandedContent: View {
         case .gaming: GamingTab(psn: vm.psn)
         case .crypto: CryptoTab(crypto: vm.crypto)
         case .weather: WeatherTab(weather: vm.weather)
-        case .files: ShelfTab(tray: vm.files, clipboard: vm.clipboard, tumblr: vm.tumblr, portfolio: vm.portfolio,
+        case .files: ShelfTab(tray: vm.files, clipboard: vm.clipboard, tumblr: vm.tumblr,
                                        cards: vm.cards, openSettings: vm.openSettings)
         case .pokedex: PokedexTab()
         case .focus: FocusTab(focus: vm.focus)

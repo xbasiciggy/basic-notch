@@ -5,7 +5,6 @@ struct ShelfTab: View {
     @ObservedObject var tray: FileTrayService
     @ObservedObject var clipboard: ClipboardService
     @ObservedObject var tumblr: TumblrService
-    @ObservedObject var portfolio: GalleryManagerInbox
     @ObservedObject var cards: CardIngestService
     let openSettings: () -> Void
 
@@ -13,16 +12,14 @@ struct ShelfTab: View {
         HStack(alignment: .top, spacing: 14) {
             VStack(spacing: 8) {
                 if cards.card != nil || cards.lastImport != nil {
-                    CardIngestPanel(cards: cards, tray: tray, portfolio: portfolio)
+                    CardIngestPanel(cards: cards, tray: tray)
                         .transition(.move(edge: .top).combined(with: .opacity))
                 }
                 Group {
                 if tumblr.isComposing {
                     TumblrCompose(tumblr: tumblr, tray: tray, openSettings: openSettings)
-                } else if portfolio.isComposing {
-                    PortfolioCompose(inbox: portfolio, tray: tray)
                 } else {
-                    FilesTab(tray: tray, tumblr: tumblr, portfolio: portfolio)
+                    FilesTab(tray: tray, tumblr: tumblr)
                 }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -40,7 +37,6 @@ struct ShelfTab: View {
 struct CardIngestPanel: View {
     @ObservedObject var cards: CardIngestService
     @ObservedObject var tray: FileTrayService
-    @ObservedObject var portfolio: GalleryManagerInbox
 
     var body: some View {
         HStack(spacing: 10) {
@@ -71,16 +67,8 @@ struct CardIngestPanel: View {
                     Button { cards.importNew() } label: { Label("Import \(card.newFiles.count)", systemImage: "square.and.arrow.down") }
                         .buttonStyle(PillButtonStyle())
                 }
-                if let last = cards.lastImport {
+                if cards.lastImport != nil {
                     Button { cards.revealLastImport() } label: { Label("Show", systemImage: "folder") }
-                    if !last.images.isEmpty {
-                        Button {
-                            for image in last.images.reversed() { tray.insert(image) }
-                            tray.selected = Set(last.images)
-                            portfolio.isComposing = true
-                        } label: { Label("Portfolio", systemImage: "photo.stack") }
-                            .help("Send the JPEG/HEIC shots to a Gallery Manager album")
-                    }
                 }
                 if cards.card != nil {
                     Button { cards.eject() } label: { Image(systemName: "eject.fill") }.help("Eject card")
@@ -107,7 +95,6 @@ struct CardIngestPanel: View {
 struct FilesTab: View {
     @ObservedObject var tray: FileTrayService
     @ObservedObject var tumblr: TumblrService
-    @ObservedObject var portfolio: GalleryManagerInbox
 
     var body: some View {
         if tray.files.isEmpty {
@@ -127,9 +114,6 @@ struct FilesTab: View {
                          : "\(tray.selected.count) selected")
                         .font(.caption.bold()).foregroundStyle(.secondary)
                     Spacer()
-                    Button { portfolio.isComposing = true } label: { Label("Portfolio", systemImage: "photo.stack") }
-                        .disabled(tray.images.isEmpty)
-                        .help("Add images to a portfolio album via Gallery Manager")
                     Button { tumblr.isComposing = true } label: { Label("Tumblr", systemImage: "paperplane.fill") }
                         .disabled(tray.images.isEmpty)
                         .help(tray.images.isEmpty ? "Add images to the shelf to post them" : "Post images to Tumblr")

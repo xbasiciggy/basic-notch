@@ -1,9 +1,9 @@
 import Foundation
 import Security
 
-/// Minimal Keychain wrapper for the image API key (never stored in UserDefaults).
+/// App-scoped storage for optional account secrets and tokens.
 enum Keychain {
-    private static let service = "com.local.BasicNotch"
+    private static let service = Bundle.main.bundleIdentifier ?? "com.basiciggy.BasicNotch"
 
     static func get(_ account: String) -> String? {
         let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,

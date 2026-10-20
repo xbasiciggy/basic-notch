@@ -88,7 +88,6 @@ enum AppSettings {
         "weatherCity": "New York",
         "weatherUseCurrentLocation": false,
         "useFahrenheit": true,
-        "weatherPortfolioBackdrop": false,
         "cryptoCoins": "bitcoin,ethereum,solana,dogecoin",
         "favoriteTeams": "",
         "league": "nfl",
@@ -131,7 +130,6 @@ final class NotchViewModel: ObservableObject {
     let cursor = CursorTracker()
     let clipboard = ClipboardService()
     let tumblr = TumblrService()
-    let portfolio = GalleryManagerInbox()
     let volume = SystemVolume()
     let focus = FocusTimer()
     let system = SystemStatsService()
@@ -206,7 +204,7 @@ final class NotchViewModel: ObservableObject {
     }
 
     /// Pinned, or the user is typing (coin search, Tumblr post).
-    var keepsOpen: Bool { isPinned || crypto.isSearching || tumblr.isComposing || portfolio.isComposing }
+    var keepsOpen: Bool { isPinned || crypto.isSearching || tumblr.isComposing }
 
     /// Live activities beyond music, in priority order: the first one active shows in the closed notch.
     enum LiveActivity: Equatable {

@@ -1,62 +1,47 @@
 # BasicNotch
 
-A notch companion for MacBooks. It sits over the camera notch, opens when you hover it, and shows whatever you care about: music, sports scores, PlayStation friends, crypto prices, weather, a file shelf, and a party of Pokémon that wander along the bar and sometimes battle each other.
+Free native Mac notch companion. macOS 14 or later; universal Apple Silicon + Intel build.
 
-Built with SwiftUI and AppKit. macOS 14 or later. No third-party packages.
+## Install
+
+Open `dist/preview/BasicNotch-1.0.1.dmg`, drag BasicNotch to Applications and launch it. Use the sparkle menu in the menu bar to access Settings, Getting Started, the full User Guide, or Quit. There is no Dock icon.
+
+The local package is ad-hoc signed, not notarized. A Developer ID signed and Apple-notarized build is needed for the usual warning-free internet download flow.
 
 ## Features
 
-- **Now Playing**: Spotify and Apple Music with artwork, controls, volume, synced lyrics (from [LRCLIB](https://lrclib.net)), and a glow in the album's colors.
-- **Sports**: live scores from ESPN for NFL, NBA, MLB, NHL, college football, WNBA, Premier League and MLS, with favorite teams pinned and alerts when they score.
-- **Gaming**: your PlayStation friends and what they're playing.
-- **Crypto**: prices and charts from CoinGecko, add any coin, price alerts.
-- **Weather**: forecast from [Open-Meteo](https://open-meteo.com), current location or a saved city, golden-hour and sunset-quality hints.
-- **Shelf**: drop files to keep them handy, recently copied text, and posting images to Tumblr.
-- **Focus timer, system stats, AirPods battery, calendar heads-up, camera mirror.**
-- **Pokémon**: they walk, catch Poké Balls, battle and fill a Pokédex.
+Music/Spotify controls and lyrics, sports scores, optional PlayStation friends, crypto charts and alerts, weather and golden hour, file Shelf, in-memory clipboard history, local camera-card imports, optional Tumblr posts, focus timer, system stats, battery and AirPods status, calendar reminders, camera mirror, compatible download progress, best-effort recording timer, local Claude Code usage estimates, and Pokémon companions with catching, battles and Pokédex.
 
-## Build
+Includes 18 Pokémon and 16 shiny variants from SpriteCollab, with unchanged PNG sheets, original credit logs, contributor names, license and a pinned source revision. Artwork terms are noncommercial and attribution is required; see [credits](Docs/SPRITE-CREDITS.md). No endorsement is implied.
 
-You need Xcode 16 or later.
+Gallery Manager/Basiciggy portfolio upload and portfolio weather-library access have been removed.
 
-```bash
-git clone <this repo>
-cd BasicNotch
-open BasicNotch.xcodeproj    # then Run (⌘R)
+See [User Guide](Docs/USER-GUIDE.md) for all features, setup, privacy, limits and troubleshooting, and [Validation](Docs/VALIDATION.md) for checks actually performed.
+
+## Build and package
+
+Requires Xcode with a compatible macOS SDK (tested with Xcode 27). No third-party Swift dependencies.
+
+```sh
+tools/package-release.sh
 ```
 
-It builds with ad-hoc signing out of the box. Because an ad-hoc signature changes with every build, macOS will keep asking for Keychain and privacy permissions after each update. To avoid that, create `Config/Local.xcconfig` (untracked) with your own developer identity:
+Creates a universal `.app`, ZIP, drag-to-Applications DMG, user guide and SHA-256 checksums in `dist/preview/` (or `dist/release/` for notarized builds).
 
-```
-CODE_SIGN_IDENTITY = Apple Development
-CODE_SIGN_STYLE = Manual
-DEVELOPMENT_TEAM = YOUR_TEAM_ID
-```
+For a public notarized build, import your Developer ID Application certificate and configure a notarytool Keychain profile first, then run:
 
-`tools/BasicNotch.command` rebuilds and installs the app to `/Applications`.
-
-## Pokémon sprites
-
-The sprites are not included, because they are Nintendo/Game Freak artwork. Without them the app works normally and the Pokémon simply don't appear. To add them, run the importer against a project that has PMD-style sprite sheets and a `public/data.js` roster:
-
-```bash
-python3 tools/import_pokebrawl_sprites.py /path/to/your/sprite-project
+```sh
+SIGN_IDENTITY='Developer ID Application: Your Name (TEAMID)' NOTARY_PROFILE=BasicNotch tools/package-release.sh
 ```
 
-It writes `BasicNotch/Resources/Mons.bundle`, which is git-ignored.
+The script signs with hardened runtime and camera/Automation entitlements, submits to Apple, staples and validates tickets, and assesses the app. It does not publish, install into Applications or modify an existing app. Do not put signing secrets in the source tree.
 
-## Services and permissions
+## Artwork refresh
 
-| What | Needs |
-|---|---|
-| Music, Spotify | macOS Automation permission, asked on first use |
-| Calendar, camera, location | Asked on first use |
-| PlayStation friends | Signing in on Sony's own page. This uses the PlayStation mobile app's unofficial endpoints, which Sony can change at any time |
-| Tumblr | Your own Tumblr app: register one at tumblr.com/oauth/apps, set its redirect URL to the one shown in Settings, and paste its key and secret |
-| Portfolio upload | Optional hand-off to a companion app called Gallery Manager; ignore the Portfolio button if you don't use it |
+```sh
+python3 tools/import_spritecollab.py f663e2331a5f83504d1e7a01573dc53a6708f4c7
+```
 
-Logins and API secrets are stored in the macOS Keychain. Nothing is sent anywhere except the services listed above.
+Imports the curated roster, validates sheet dimensions/timing and retains credits. Omit the SHA only to intentionally update to the upstream master revision. The older `import_pokebrawl_sprites.py` supports its original separate sprite-project format and can replace this roster; retain the appropriate credits for any replacement artwork.
 
-## Not affiliated
-
-Not affiliated with or endorsed by Nintendo, Game Freak, The Pokémon Company, Sony, Spotify, Apple, or Tumblr. Names and artwork belong to their owners.
+Original source: https://github.com/xbasiciggy/basic-notch . Artwork source: https://github.com/PMDCollab/SpriteCollab . See the guide for release/rights notes and third-party service dependencies.

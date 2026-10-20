@@ -1,18 +1,14 @@
 import SwiftUI
-import ImageIO
 
 /// Weather, styled after the Cultiveq smart-farming concept: a misty landscape backdrop fading into
 /// deep forest green, frosted green glass cards, an ultra-thin oversized temperature, glass pill chips
 /// and a "Today's suggestions" list. The backdrop is a softly blurred photo that matches the weather and
-/// the sun's real position, with rain and snow animated on top (see WeatherPhotoBackdrop), or optionally
-/// one of your own landscape photos from Gallery Manager's Adventures albums, changing daily.
+/// the sun's real position, with rain and snow animated on top (see WeatherPhotoBackdrop).
 struct WeatherTab: View {
     @ObservedObject var weather: WeatherService
     @AppStorage("weatherCity") private var city = "New York"
     @AppStorage("useFahrenheit") private var fahrenheit = true
-    @AppStorage("weatherPortfolioBackdrop") private var usePortfolioBackdrop = false
     @AppStorage("weatherUseCurrentLocation") private var useCurrentLocation = false
-    @State private var backdrop: NSImage?
 
     private var today: WeatherDay? { weather.days.first }
 
@@ -60,29 +56,13 @@ struct WeatherTab: View {
             try? await Task.sleep(for: .milliseconds(500))  // debounce typing in Settings
             if !Task.isCancelled { await weather.refresh() }
         }
-        .task(id: "\(usePortfolioBackdrop)|\(Calendar.current.ordinality(of: .day, in: .era, for: Date()) ?? 0)") {
-            backdrop = usePortfolioBackdrop ? await WeatherBackdrop.todaysPhoto() : nil
-        }
+
     }
 
     // MARK: Background
 
     private var background: some View {
         ZStack {
-            if let backdrop {
-                GeometryReader { geo in
-                    Image(nsImage: backdrop).resizable().aspectRatio(contentMode: .fill)
-                        .frame(width: geo.size.width, height: geo.size.height)
-                        .clipped()
-                }
-                // Fade into forest green at the bottom and darken the left for the big temperature.
-                LinearGradient(stops: [
-                    .init(color: .clear, location: 0),
-                    .init(color: Forest.deep.opacity(0.55), location: 0.55),
-                    .init(color: Forest.deep.opacity(0.95), location: 1),
-                ], startPoint: .top, endPoint: .bottom)
-                LinearGradient(colors: [Forest.deep.opacity(0.55), .clear], startPoint: .leading, endPoint: .center)
-            } else {
                 WeatherPhotoBackdrop(code: weather.now?.code ?? 0, isDay: weather.now?.isDay ?? true,
                                      sunrise: today?.sunrise, sunset: today?.sunset,
                                      wind: min((weather.now?.wind ?? 0) / (fahrenheit ? 20 : 32), 1.5))
@@ -92,7 +72,6 @@ struct WeatherTab: View {
                     .init(color: Forest.deep.opacity(0.6), location: 1),
                 ], startPoint: .top, endPoint: .bottom)
                 LinearGradient(colors: [.black.opacity(0.3), .clear], startPoint: .leading, endPoint: .center)
-            }
         }
     }
 
@@ -334,89 +313,6 @@ private struct SuggestionRow: View {
 private struct TightLabel: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack(spacing: 3) { configuration.icon; configuration.title }
-    }
-}
-
-/// Picks one of your landscape photos from Gallery Manager's Adventures albums (a new one each day).
-enum WeatherBackdrop {
-    private static var cache: (day: Int, image: NSImage)?
-
-    @MainActor
-    static func todaysPhoto() async -> NSImage? {
-        let day = Calendar.current.ordinality(of: .day, in: .era, for: Date()) ?? 0
-        if let cache, cache.day == day { return cache.image }
-        let image = await Task.detached(priority: .utility) { pick(day: day) }.value
-        if let image { cache = (day, image) }
-        return image
-    }
-
-    private static func pick(day: Int) -> NSImage? {
-        struct Library: Decodable {
-            struct G: Decodable { let title: String; let navigationItemID: UUID?; let photoPaths: [String]? }
-            let galleries: [G]
-        }
-        let adventures = UUID(uuidString: "A11E0000-0000-4000-8000-000000000001")
-        let skip = ["hospital", "abandoned", "map"]  // not landscape-y
-        let url = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("GalleryManager/library.json")
-        guard let data = try? Data(contentsOf: url),
-              let library = try? JSONDecoder().decode(Library.self, from: data) else { return nil }
-        let photos = library.galleries
-            .filter { g in g.navigationItemID == adventures && !skip.contains { g.title.lowercased().contains($0) } }
-            .flatMap { $0.photoPaths ?? [] }
-        guard !photos.isEmpty else { return nil }
-
-        // Walk from today's pick until a wide photo with open sky at the top turns up.
-        var generator = SeededGenerator(seed: UInt64(day))
-        var fallback: CGImage?
-        for _ in 0..<40 {
-            let path = photos[Int(generator.next() % UInt64(photos.count))]
-            guard let source = CGImageSourceCreateWithURL(URL(fileURLWithPath: path) as CFURL, nil),
-                  let cg = CGImageSourceCreateThumbnailAtIndex(source, 0, [
-                      kCGImageSourceCreateThumbnailFromImageAlways: true,
-                      kCGImageSourceCreateThumbnailWithTransform: true,
-                      kCGImageSourceThumbnailMaxPixelSize: 1600,
-                  ] as CFDictionary),
-                  Double(cg.width) > Double(cg.height) * 1.2 else { continue }
-            if fallback == nil { fallback = cg }
-            if looksLikeLandscape(cg) { return NSImage(cgImage: cg, size: NSSize(width: cg.width, height: cg.height)) }
-        }
-        return fallback.map { NSImage(cgImage: $0, size: NSSize(width: $0.width, height: $0.height)) }
-    }
-
-    /// Bright, sky-like top third and a darker, more colorful bottom — a rough "outdoor landscape" test.
-    private static func looksLikeLandscape(_ image: CGImage) -> Bool {
-        let w = 24, h = 16
-        var pixels = [UInt8](repeating: 0, count: w * h * 4)
-        guard let ctx = CGContext(data: &pixels, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4,
-                                  space: CGColorSpaceCreateDeviceRGB(),
-                                  bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return false }
-        ctx.interpolationQuality = .medium
-        ctx.draw(image, in: CGRect(x: 0, y: 0, width: w, height: h))
-        func stats(rows: Range<Int>) -> (luma: Double, sat: Double) {
-            var luma = 0.0, sat = 0.0, n = 0.0
-            for y in rows { for x in 0..<w {
-                let i = (y * w + x) * 4
-                let r = Double(pixels[i]) / 255, g = Double(pixels[i + 1]) / 255, b = Double(pixels[i + 2]) / 255
-                let mx = max(r, g, b), mn = min(r, g, b)
-                luma += 0.299 * r + 0.587 * g + 0.114 * b
-                sat += mx > 0 ? (mx - mn) / mx : 0
-                n += 1
-            } }
-            return (luma / n, sat / n)
-        }
-        // Memory row 0 is the top of the image.
-        let top = stats(rows: 0..<(h / 3)), bottom = stats(rows: (h / 2)..<h)
-        return top.luma > 0.5 && top.luma > bottom.luma + 0.08 && bottom.sat > 0.15
-    }
-
-    private struct SeededGenerator {
-        var state: UInt64
-        init(seed: UInt64) { state = seed &+ 0x9E3779B97F4A7C15 }
-        mutating func next() -> UInt64 {
-            state = state &* 6364136223846793005 &+ 1442695040888963407
-            return state >> 17
-        }
     }
 }
 

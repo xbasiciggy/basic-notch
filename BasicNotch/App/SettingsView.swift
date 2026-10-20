@@ -48,7 +48,7 @@ struct SettingsView: View {
     @AppStorage("tumblrClientID") private var tumblrClientID = ""
     @AppStorage("tumblrBlog") private var tumblrBlog = ""
     @State private var tumblrSecret = Keychain.get(TumblrService.secretAccount) ?? ""
-    @AppStorage("weatherPortfolioBackdrop") private var weatherPortfolioBackdrop = false
+    @State private var loginError: String?
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
 
     var body: some View {
@@ -111,11 +111,13 @@ struct SettingsView: View {
                 }
                 Toggle("Show album art & visualizer when music plays", isOn: $musicLiveActivity)
                 Toggle("Haptic feedback when the notch opens", isOn: $haptics)
+                if let loginError { Text(loginError).font(.caption).foregroundStyle(.red) }
                 Toggle("Launch at login", isOn: $launchAtLogin)
                     .onChange(of: launchAtLogin) { _, enabled in
                         do {
                             if enabled { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }
                         } catch {
+                            loginError = error.localizedDescription
                             launchAtLogin = SMAppService.mainApp.status == .enabled
                         }
                     }
@@ -213,6 +215,10 @@ struct SettingsView: View {
     private var pokemonTab: some View {
         Form {
             Section {
+                if PokeBrawlSprites.roster.isEmpty {
+                    Text("Sprite artwork is not included in this build. Pokémon features need a separately supplied Mons.bundle. See the User Guide in the menu bar.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
                 Toggle("Show Pokémon walking on the notch", isOn: $showPokemon)
                 Stepper("Party size: \(pokemonCount)", value: $pokemonCount, in: 1...6)
                 Button("Respawn party", action: onRespawn)
@@ -294,7 +300,6 @@ struct SettingsView: View {
                 TextField("City", text: $city)
                     .disabled(useCurrentLocation)
                 Toggle("Fahrenheit", isOn: $fahrenheit)
-                Toggle("Use my portfolio photos instead of the weather photos", isOn: $weatherPortfolioBackdrop)
             }
 
             Section {
