@@ -183,3 +183,11 @@ This is a locally signed universal release candidate, not a notarized public rel
 For warning-free public downloads, the maintainer must supply a Developer ID Application identity, enable hardened runtime with camera/Automation entitlements, submit to Apple notary service and staple the ticket. tools/package-release.sh supports that flow using SIGN_IDENTITY and NOTARY_PROFILE. No private credentials are included in the app.
 
 The upstream app repository contained no LICENSE file at the recorded revision. Confirm the owner's redistribution terms before publishing a modified source or binary release; the SpriteCollab asset license is recorded separately. Bundled weather-image provenance also needs confirmation before a broad public release.
+
+## Desktop buddy (1.2.0 preview)
+
+Enable Settings → Buddy → Show Sylveon on the desktop. Drag to reposition; right-click to pause, reset, open settings or hide. Size, idle/walk/activity animation and live status are configurable in Buddy settings. Placement survives relaunch and recovers when a display disconnects. Reduce Motion stops animation.
+
+Lightroom and card readouts share the existing services and honor General → Live activities switches. Install the Lightroom export action as described above; card progress covers BasicNotch imports. Tethered-camera capture and transfers by other apps remain planned.
+
+Sylveon artwork: baronessfaron, PMD SpriteCollab, CC BY-NC 4.0 (noncommercial with attribution). Credits and license links are available in Buddy settings. See Docs/DESKTOP-BUDDY.md for source revision and validation limits.

@@ -69,3 +69,7 @@ python3 tools/import_spritecollab.py f663e2331a5f83504d1e7a01573dc53a6708f4c7
 Imports the curated roster, validates sheet dimensions/timing and retains credits. Omit the SHA only to intentionally update to the upstream master revision. The older `import_pokebrawl_sprites.py` supports its original separate sprite-project format and can replace this roster; retain the appropriate credits for any replacement artwork.
 
 Original source: https://github.com/xbasiciggy/basic-notch . Artwork source: https://github.com/PMDCollab/SpriteCollab . See the guide for release/rights notes and third-party service dependencies.
+
+## Desktop buddy preview (1.2.0)
+
+Settings → Buddy enables a draggable floating Sylveon with saved placement, animation controls, size controls and existing Lightroom/card activity readouts. The menu bar also offers Show / Hide Desktop Buddy. See [setup, attribution and preview limits](Docs/DESKTOP-BUDDY.md). Local 1.2.0 packages include this feature; the older public download above does not.

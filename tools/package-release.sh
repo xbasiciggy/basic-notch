@@ -4,7 +4,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
-VERSION=1.1.1
+VERSION=1.2.0
 IDENTITY="${SIGN_IDENTITY:--}"
 if [[ "$IDENTITY" == '-' ]]; then OUT="$ROOT/dist/preview"; else OUT="$ROOT/dist/release"; fi
 if [[ "$IDENTITY" != '-' && -z "${NOTARY_PROFILE:-}" ]]; then
