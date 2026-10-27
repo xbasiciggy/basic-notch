@@ -70,6 +70,8 @@ Imports the curated roster, validates sheet dimensions/timing and retains credit
 
 Original source: https://github.com/xbasiciggy/basic-notch . Artwork source: https://github.com/PMDCollab/SpriteCollab . See the guide for release/rights notes and third-party service dependencies.
 
-## Desktop buddy preview (1.2.0)
+## Desktop buddy preview (1.3.0)
 
-Settings → Buddy enables a draggable floating Sylveon with saved placement, animation controls, size controls and existing Lightroom/card activity readouts. The menu bar also offers Show / Hide Desktop Buddy. See [setup, attribution and preview limits](Docs/DESKTOP-BUDDY.md). Local 1.2.0 packages include this feature; the older public download above does not.
+Settings → Buddy adds eight-direction roaming, Pokémon/shiny selection, pickup reactions, animation and magnification controls. A name tag shows level/XP. Hold the buddy or click its tag for food, ball play, petting and sleep; each species keeps its own nickname and progress. Pikachu has its actual Shock animation. Optional comments use the existing weather report, and Lightroom/card status shares the existing services.
+
+See [setup, attribution and validation limits](Docs/DESKTOP-BUDDY.md). The regular app uses its existing 18-species roster; private Dev artwork and data are excluded. The public download linked above still points to the older release. Universal 1.3.0 preview builds and 5,358 automated checks pass; the guide lists remaining manual UI/device checks.

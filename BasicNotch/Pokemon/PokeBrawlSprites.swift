@@ -25,6 +25,7 @@ struct RosterEntry: Decodable {
 }
 
 struct SpriteAnim {
+    let directions: [[CGImage]]
     let left: [CGImage]
     let right: [CGImage]
     let durations: [Double]
@@ -36,7 +37,7 @@ struct SpriteAnim {
     /// Seconds into the animation when the attack lands.
     let hitTime: Double
 
-    init?(sheet: CGImage, anim: RosterEntry.Anim) {
+    init?(sheet: CGImage, anim: RosterEntry.Anim, allDirections: Bool = false) {
         let w = anim.w, h = anim.h
         guard w > 0, h > 0, !anim.d.isEmpty else { return nil }
         let rows = max(1, Int((Double(sheet.height) / Double(h)).rounded()))
@@ -50,7 +51,9 @@ struct SpriteAnim {
         let rawRight = cells(rows >= 8 ? 2 : 0)
 
         // Trim the empty padding around the cells (same box for every frame, so feet stay planted).
-        let box = Self.opaqueBounds(rawLeft + rawRight, width: w, height: h)
+        let rawDirections = allDirections ? (0..<8).map { cells(rows >= 8 ? $0 : 0) } : []
+        let box = Self.opaqueBounds(allDirections ? rawDirections.flatMap { $0 } : rawLeft + rawRight, width: w, height: h)
+        directions = allDirections ? rawDirections.map { frames in frames.compactMap { $0.cropping(to: box) } } : []
         left = rawLeft.compactMap { $0.cropping(to: box) }
         right = rawRight.compactMap { $0.cropping(to: box) }
         guard !left.isEmpty, !right.isEmpty else { return nil }
@@ -60,6 +63,22 @@ struct SpriteAnim {
         centerOffset = box.midX - CGFloat(w) / 2
         let hit = anim.hit ?? -1
         hitTime = hit >= 0 ? durations.prefix(hit).reduce(0, +) : total * 0.5
+    }
+
+    func frame(at time: Double, direction: Int, loop: Bool = true) -> CGImage {
+        let frames = directions.isEmpty ? left : directions[min(7, max(0, direction))]
+        return timedFrame(frames, time: time, loop: loop)
+    }
+
+    private func timedFrame(_ frames: [CGImage], time: Double, loop: Bool) -> CGImage {
+        guard frames.count > 1 else { return frames[0] }
+        if !loop && time >= total { return frames[frames.count - 1] }
+        var t = max(0, time).truncatingRemainder(dividingBy: total)
+        for (i, d) in durations.enumerated() where i < frames.count {
+            if t < d { return frames[i] }
+            t -= d
+        }
+        return frames[frames.count - 1]
     }
 
     func frame(at time: Double, facingRight: Bool, loop: Bool = true) -> CGImage {

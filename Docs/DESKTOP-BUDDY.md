@@ -1,34 +1,44 @@
-# Desktop buddy preview — 1.2.0
+# Desktop buddy — 1.3.0 preview
 
-Enable Settings → Buddy → Show Sylveon on the desktop, or use the sparkle menu's Show / Hide Desktop Buddy command. The buddy starts disabled so existing installations retain their layout.
+Enable Settings → Buddy or use Show / Hide Desktop Buddy in the sparkle menu. The regular app includes its existing 18 Pokémon and 16 shiny variants. Search by name and select your buddy. The personal Dev sprite collection and private features are not part of this release.
 
-Drag the sprite to move it between displays. The full panel stays within a display's usable area when released, and its position survives relaunch. A removed display causes the buddy to return to an available display. Reset position places it at the lower-right of the main display. It floats above normal windows and follows Spaces.
+## Roaming and appearance
 
-Right-click for pause/resume, settings, reset and hide. Settings includes idle/walk/react-to-activity, size, and activity visibility. Reduce Motion disables animation. Hiding destroys the panel and its animation timeline. The buddy is independent of the existing notch Pokémon and their game state.
+Your buddy walks in eight directions toward random destinations on its current display, with brief rests. Hovering, dragging, the care menu, sleep, Pause buddy and Reduce Motion stop roaming. Drag it to another display to explore there. Position is saved on arrival, hide and quit; removed displays trigger recovery to an available screen. Roaming is enabled by default, but the buddy itself is opt-in.
 
-## Live activities
+The size slider now reaches 10.5, 250% larger than its previous maximum of 3 (3.5×). The sprite region expands with it so the name tag and care controls remain separate. Actual displayed size is limited by the screen. Settings also includes walking speed and 100–300% magnification (200% doubles the rendered size). Magnification is limited to the display's usable area so the panel remains reachable. Idle, walk, attack/play, hurt, and available faint/lie-down poses can be selected. Pikachu additionally offers Shock. Picking up shows a front-facing hurt pose. Missing poses fall back to idle/walk.
 
-The panel observes the same LightroomExportService and CardIngestService as the notch; it starts no extra scanning or monitoring services. It can display simultaneous Lightroom rendering and card-import progress. General → Live activities preferences also apply. React-to-activity uses the walk animation while either service reports work.
+## Name tag, XP and care
 
-Lightroom requires the existing export action: see LIGHTROOM-SETUP.md. Card detection requires a mounted volume containing DCIM. Progress represents imports initiated in BasicNotch, not copies performed by other applications. A mounted USB camera may qualify if exposed as such a volume; tethered capture, PTP camera connections and third-party transfer monitoring remain planned. This feature does not start camera capture or automatically copy files.
+The name tag shows a nickname or species name, level and XP bar. Click it, hold the sprite for about half a second, right-click → Food, play & sleep, or use Settings → Buddy → Open food, play & sleep menu. Dragging more than a few points cancels the hold gesture.
 
-## Artwork verification
+- Food: berries or an apple, with a food prop and an eating pose where present.
+- Play: tennis/beach ball bounce, petting, and Pikachu's Shock action.
+- Sleep: put the buddy down for a nap, then use Wake up when ready. Sleeping pauses travel and survives relaunch. Sleep sprites are available for Pikachu and Sylveon; other species use their idle pose with a Zzz indicator.
+- Rename: save a nickname of up to 24 characters.
 
-No new asset download is required: the existing Mons.bundle contains Sylveon (0700), with a credit record explicitly marked CC_BY-NC_4 for Idle and Walk, dated 2024-07-04, contributor 544245909639397378, resolved to baronessfaron in credit_names.txt. The source revision is f663e2331a5f83504d1e7a01573dc53a6708f4c7:
-https://github.com/PMDCollab/SpriteCollab/tree/f663e2331a5f83504d1e7a01573dc53a6708f4c7/sprite/0700
+Food grants 10 XP, ball play 15, pet/Shock 5, and waking after a nap of at least one minute grants 5. XP has a shared 10-second reward cooldown; care still works during it. Each 100 XP earns a level, capped at 100. There are no neglect penalties, purchases, or loss of XP. Normal/shiny appearances of the same species share progress. Different species retain separate profiles.
 
-Upstream submission/use policy checked October 27, 2026:
-https://github.com/PMDCollab/SpriteCollab/blob/master/README.md
-https://creativecommons.org/licenses/by-nc/4.0/
+Care state is local, stored under desktopBuddyCare.v1 in the app's existing preferences. It does not replace notch party/Pokédex progress or clear other settings. Transient comments and play actions are not persisted.
 
-Use is noncommercial with attribution. Original PNG sheets and credit logs remain unchanged; the existing renderer crops frames at runtime. Attribution and license links appear in Buddy settings. Full credits and license remain bundled. The buddy deliberately selects custom Sylveon artwork rather than expanding use of the roster's CHUNSOFT/Unspecified original-game assets. The existing roster is unchanged. Contributor licenses do not grant underlying Pokémon trademark or other third-party rights; no endorsement is implied. Reassess rights before commercial distribution.
+## Comments and live activities
 
-## Validation and remaining hardware checks
+Occasional comments appear roughly every 90–150 seconds after an initial delay. Weather remarks use the existing WeatherService report and selected units, with an unavailable message if it has no usable report. No new location permission or network service is added. Turn comments off in Buddy settings. Comments do not announce while paused, sleeping or interacting.
 
-Automated checks cover multi-display position containment, negative display coordinates, disconnected-screen recovery, an empty display list, and loading/timing the selected sprite sheets with their explicit credit record. Existing core regression checks run alongside these.
+Lightroom and card readouts share the existing services and General → Live activities preferences. Lightroom requires the companion export action. Card progress covers imports performed in BasicNotch. Tethered capture, PTP cameras and transfers performed by other apps remain planned.
 
-Manual preview checks still required: drag across physical displays, disconnect/reconnect, Spaces/fullscreen behavior, VoiceOver, long-running energy use, and actual Lightroom/card activity in the buddy UI. No new physical-camera or Lightroom export was initiated during this implementation. The existing Lightroom host verification predates this feature.
+## Artwork
 
-The packaged preview is locally ad-hoc signed, not Apple notarized. Intel compilation does not constitute testing on Intel hardware.
+Existing roster credits and licenses are retained. Eight additional original sheets were imported unchanged from pinned SpriteCollab revision f663e2331a5f83504d1e7a01573dc53a6708f4c7: normal/shiny Pikachu Shock, Eat and Sleep; normal/shiny Sylveon Sleep. Animation metadata comes from the existing pinned XML and credits cover these actions. Run tools/import_spritecollab.py with that revision to reproduce the curated import.
 
-Validation performed October 27, 2026: Debug build succeeded; universal Release build succeeded for arm64 and x86_64 with Xcode 27.2. 278 existing Swift core checks and 1,493 buddy checks passed. Lua checks were skipped because Lua was unavailable. The release script verified the ad-hoc signature and produced app ZIP, DMG, companion Lightroom plug-in ZIP and SHA-256 checksums. The local baseline was confirmed against GitHub main at 1568fa066cc92cc20cf4a75c9b79ee315613afda. A pre-existing Bash 3 empty-array failure in run-checks.sh was corrected so the no-Lua check path works.
+Source: https://github.com/PMDCollab/SpriteCollab/tree/f663e2331a5f83504d1e7a01573dc53a6708f4c7
+Policy: https://github.com/PMDCollab/SpriteCollab#submission-and-use-policy
+License: https://creativecommons.org/licenses/by-nc/4.0/
+
+SpriteCollab custom contributions permit noncommercial use with attribution. Original CHUNSOFT/Unspecified records retain their underlying rights; contributor licenses do not grant Pokémon trademark or other third-party rights. No endorsement is implied. Reassess rights before commercial distribution. Full artist credits and license links are in Buddy settings and Mons.bundle.
+
+## Validation and release limits
+
+Run tools/run-checks.sh for existing core checks, display placement, eight-direction sprite decoding, movement speed/arrival/sleep recovery, synthetic row selection and care-state persistence/rewards. Lua integration checks require Lua to be installed.
+
+Validation on October 27, 2026: universal Release build succeeded on Xcode 27.2; 5,358 automated checks passed (278 core, 1,493 placement/sprite, 3,563 movement/directional animation, 24 care/layout). Lua checks were skipped because Lua is unavailable. An isolated app launched, Buddy settings and care controls rendered, nickname editing saved, and feeding visibly advanced XP to 10%. Physical display/Spaces behavior, hold-versus-drag interactions, live weather/device integration and long-running energy use still require hands-on validation. The existing Dev 1.2.3 installation is separate. Local preview packages are ad-hoc signed, not notarized.

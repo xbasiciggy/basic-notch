@@ -26,3 +26,10 @@ swiftc -parse-as-library -module-cache-path "$ROOT/.build/ModuleCache" \
     Tests/BuddyChecks.swift BasicNotch/Buddy/BuddyPlacement.swift BasicNotch/Pokemon/PokeBrawlSprites.swift \
     -o "$RUN/BuddyChecks"
 "$RUN/BuddyChecks" "$ROOT/BasicNotch/Resources/Mons.bundle"
+swiftc -parse-as-library -module-cache-path "$ROOT/.build/ModuleCache" \
+    Tests/BuddyRoamingChecks.swift BasicNotch/Buddy/BuddyMotion.swift BasicNotch/Pokemon/PokeBrawlSprites.swift \
+    -o "$RUN/BuddyRoamingChecks"
+"$RUN/BuddyRoamingChecks" "$ROOT/BasicNotch/Resources/Mons.bundle"
+swiftc -parse-as-library -module-cache-path "$ROOT/.build/ModuleCache" \
+    Tests/BuddyCareChecks.swift BasicNotch/Buddy/BuddyCare.swift BasicNotch/Buddy/BuddyLayout.swift -o "$RUN/BuddyCareChecks"
+"$RUN/BuddyCareChecks"

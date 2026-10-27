@@ -5,3 +5,5 @@ Config/Local.xcconfig
 __pycache__/
 
 .build-buddy/
+
+.build-care/
