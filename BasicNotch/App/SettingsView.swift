@@ -65,6 +65,9 @@ struct SettingsView: View {
             pokemonTab
                 .tabItem { Label("Pokémon", systemImage: "pawprint") }
                 .tag("pokemon")
+            DesktopBuddySettings()
+                .tabItem { Label("Buddy", systemImage: "pawprint.circle") }
+                .tag("buddy")
             alertsTab
                 .tabItem { Label("Alerts", systemImage: "bell.badge") }
                 .tag("alerts")

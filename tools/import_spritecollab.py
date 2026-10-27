@@ -43,7 +43,8 @@ def import_form(path, target):
     credits = fetch(path + '/credits.txt')
     (target/'credits.txt').write_bytes(credits)
     anims = {}
-    for key in ('Walk','Idle','Attack','Hurt','Faint'):
+    extra = ('Shock', 'Sleep', 'Eat') if path.split('/')[1] == '0025' else ('Sleep',) if path.split('/')[1] == '0700' else ()
+    for key in ('Walk','Idle','Attack','Hurt','Faint') + extra:
         if key not in elements: continue
         a = elements[key]
         seen = set()

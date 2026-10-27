@@ -183,3 +183,9 @@ This is a locally signed universal release candidate, not a notarized public rel
 For warning-free public downloads, the maintainer must supply a Developer ID Application identity, enable hardened runtime with camera/Automation entitlements, submit to Apple notary service and staple the ticket. tools/package-release.sh supports that flow using SIGN_IDENTITY and NOTARY_PROFILE. No private credentials are included in the app.
 
 The upstream app repository contained no LICENSE file at the recorded revision. Confirm the owner's redistribution terms before publishing a modified source or binary release; the SpriteCollab asset license is recorded separately. Bundled weather-image provenance also needs confirmation before a broad public release.
+
+## Desktop buddy (1.3.0 preview)
+
+Enable Settings → Buddy. Choose your Pokémon/shiny appearance, roaming speed, size and magnification. The name tag shows level and XP. Hold the sprite or click its name tag for feeding, ball play, petting, sleep/wake and a nickname. Pikachu has a Shock action. Each species keeps separate local progress; normal and shiny appearances share it.
+
+Optional comments use the existing weather report. Lightroom/card status shares existing services and preferences. Tethered capture and third-party transfers remain planned. See Docs/DESKTOP-BUDDY.md for complete controls, attribution and validation limits.

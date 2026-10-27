@@ -61,6 +61,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var monitors: [Any] = []
     private var dragChangeCount = NSPasteboard(name: .drag).changeCount
     private var hoverTimer: Timer?
+    private var desktopBuddy: DesktopBuddyController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -70,6 +71,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         buildStatusItem()
         startMouseTracking()
         vm.start(startParty: false)
+        desktopBuddy = DesktopBuddyController(vm: vm)
         if !UserDefaults.standard.bool(forKey: "hasSeenWelcome") { showWelcome() }
 
         NotificationCenter.default.addObserver(
@@ -83,6 +85,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 self?.layoutPanels()
             }
         }
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        desktopBuddy?.stop()
     }
 
     // MARK: - Panel
@@ -154,6 +160,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         screens.submenu = NSMenu(title: "Show on Screen")
         screens.submenu?.delegate = self
         menu.addItem(screens)
+        menu.addItem(withTitle: "Show / Hide Desktop Buddy", action: #selector(toggleBuddy), keyEquivalent: "").target = self
         menu.addItem(withTitle: "Move to Next Screen", action: #selector(nextScreen), keyEquivalent: "").target = self
         menu.addItem(.separator())
         menu.addItem(withTitle: "Settings…", action: #selector(openSettingsAction), keyEquivalent: ",").target = self
@@ -198,6 +205,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let target = displays.values.first { $0.screen.frame.contains(point) } ?? displays.values.first
         target?.vm.isPinned = true
         target?.vm.open()
+    }
+
+    @objc private func toggleBuddy() {
+        let defaults = UserDefaults.standard
+        defaults.set(!defaults.bool(forKey: "desktopBuddyEnabled"), forKey: "desktopBuddyEnabled")
     }
 
     @objc private func respawn() { displays.values.forEach { $0.vm.party.respawnAll() } }

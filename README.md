@@ -69,3 +69,9 @@ python3 tools/import_spritecollab.py f663e2331a5f83504d1e7a01573dc53a6708f4c7
 Imports the curated roster, validates sheet dimensions/timing and retains credits. Omit the SHA only to intentionally update to the upstream master revision. The older `import_pokebrawl_sprites.py` supports its original separate sprite-project format and can replace this roster; retain the appropriate credits for any replacement artwork.
 
 Original source: https://github.com/xbasiciggy/basic-notch . Artwork source: https://github.com/PMDCollab/SpriteCollab . See the guide for release/rights notes and third-party service dependencies.
+
+## Desktop buddy preview (1.3.0)
+
+Settings → Buddy adds eight-direction roaming, Pokémon/shiny selection, pickup reactions, animation and magnification controls. A name tag shows level/XP. Hold the buddy or click its tag for food, ball play, petting and sleep; each species keeps its own nickname and progress. Pikachu has its actual Shock animation. Optional comments use the existing weather report, and Lightroom/card status shares the existing services.
+
+See [setup, attribution and validation limits](Docs/DESKTOP-BUDDY.md). The regular app uses its existing 18-species roster; private Dev artwork and data are excluded. The public download linked above still points to the older release. Universal 1.3.0 preview builds and 5,358 automated checks pass; the guide lists remaining manual UI/device checks.

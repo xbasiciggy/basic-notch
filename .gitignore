@@ -3,3 +3,7 @@ dist/
 Config/Local.xcconfig
 .DS_Store
 __pycache__/
+
+.build-buddy/
+
+.build-care/
